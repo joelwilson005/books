@@ -1,5 +1,8 @@
 package com.joel.books.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.joel.books.model.Book;
 import com.joel.books.service.BookService;
 import jakarta.validation.Valid;
@@ -35,6 +38,18 @@ public class BooksController {
     public ResponseEntity<Book> addNewBook(@RequestBody @Valid Book book) {
         book = this.bookService.addBook(book);
         return new ResponseEntity<>(book, HttpStatus.CREATED);
+    }
+
+    @PatchMapping(value = "/{id}", consumes = "application/json-patch+json")
+    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody JsonPatch patch) {
+        try {
+            Book book = this.bookService.findBookById(id);
+            Book patchedBook = this.bookService.applyPatchToBook(patch, book);
+            patchedBook = this.bookService.updateBook(patchedBook);
+            return new ResponseEntity<>(patchedBook, HttpStatus.OK);
+        } catch (JsonPatchException | JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

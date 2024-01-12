@@ -26,4 +26,6 @@ public class Book {
     private String author;
     @NotNull
     private Date datePublished;
+    @NotNull
+    private String description;
 }

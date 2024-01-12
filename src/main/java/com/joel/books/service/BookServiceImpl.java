@@ -1,9 +1,14 @@
 package com.joel.books.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.joel.books.model.Book;
 import com.joel.books.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Date;
 import java.util.List;
@@ -58,5 +63,18 @@ public class BookServiceImpl implements BookService{
         } catch (IllegalArgumentException | NoSuchElementException e) {
             return false;
         }
+    }
+
+    @Override
+    public Book applyPatchToBook(JsonPatch patch, Book book) throws JsonPatchException, JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode patched = patch.apply(objectMapper.convertValue(book, JsonNode.class));
+        return objectMapper.treeToValue(patched, Book.class);
+
+    }
+
+    @Override
+    public Book updateBook(Book book) {
+        return this.bookRepository.save(book);
     }
 }
